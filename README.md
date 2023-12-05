@@ -1,35 +1,35 @@
-# Jeu de la Vie de Conway en Python
+# Conway's Game of Life in Python
 
-Ce programme Python implémente le Jeu de la Vie de Conway avec une interface graphique Tkinter. Le Jeu de la Vie est un automate cellulaire qui évolue en fonction d'états initiaux donnés et de règles simples.
+This Python program implements Conway's Game of Life with a Tkinter graphical interface. The Game of Life is a cellular automaton that evolves based on given initial states and simple rules.
 
-## Fonctionnalités
+## Features
 
-### Cellule
-- La classe `Cellule` représente une cellule dans la grille du jeu.
-- Chaque cellule peut être soit morte (`False`) soit vivante (`True`).
-- Méthodes disponibles : `est_vivant()`, `mourir()`, `naitre()`.
+### Cell
+- The `Cell` class represents a cell within the game grid.
+- Each cell can be either dead (`False`) or alive (`True`).
+- Available methods: `is_alive()`, `die()`, `birth()`.
 
-### Grille
-- La classe `Grille` représente la grille du jeu.
-- Initialisation d'une grille avec une taille donnée et une configuration initiale.
-- Compte le nombre de voisins vivants pour chaque cellule.
-- Met à jour l'état de la grille selon les règles du Jeu de la Vie.
+### Grid
+- The `Grid` class represents the game grid.
+- Initializes a grid with a given size and initial configuration.
+- Counts the number of living neighbors for each cell.
+- Updates the grid state according to the rules of the Game of Life.
 
-### JeuDeLaVieGUI
-- Interface graphique réalisée avec Tkinter pour afficher la grille du jeu.
-- Crée une fenêtre avec un canvas pour afficher la grille.
-- Met à jour l'affichage graphique à chaque itération de la simulation.
+### GameOfLifeGUI
+- Graphical interface created with Tkinter to display the game grid.
+- Creates a window with a canvas to display the grid.
+- Updates the graphical display at each iteration of the simulation.
 
-## Utilisation
-1. Assurez-vous d'avoir Python installé.
-2. Exécutez le programme à l'aide de `python main.py`.
-3. Une fenêtre s'ouvre, affichant la grille initiale.
-4. La simulation démarre et évolue selon les règles du Jeu de la Vie.
-5. Les cellules vivantes sont en noir, les cellules mortes en blanc.
+## Usage
+1. Ensure Python is installed.
+2. Run the program using `python main.py`.
+3. A window opens displaying the initial grid.
+4. The simulation starts and evolves according to the rules of the Game of Life.
+5. Living cells are shown in black, dead cells in white.
 
-## Fichiers
-- `main.py`: Contient les classes `Cellule`, `Grille`, et `JeuDeLaVieGUI`.
-- `seed.py`: Fonctions pour générer une configuration initiale aléatoire.
+## Files
+- `main.py`: Contains the `Cell`, `Grid`, and `GameOfLifeGUI` classes.
+- `seed.py`: Functions for generating a random initial configuration.
 
-## Remarque
-Ce code implémente les règles du Jeu de la Vie de Conway. La grille est mise à jour à chaque itération, modifiant l'état des cellules en fonction de leur voisinage. La configuration initiale de la grille est générée de manière aléatoire.
+## Note
+This code implements Conway's rules for the Game of Life. The grid is updated at each iteration, changing the state of the cells based on their neighborhood. The initial grid configuration is generated randomly.
