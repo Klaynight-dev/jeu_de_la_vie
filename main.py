@@ -1,94 +1,118 @@
 # main.py
 
 from seed import *
-import numpy as np
+from jdlv_utils import *
 import tkinter as tk
-
-class Cellule:
-    def __init__(self, etat=False):
-        self.etat = etat  # False pour morte, True pour vivante
-
-    def est_vivant(self):
-        return self.etat
-
-    def mourir(self):
-        self.etat = False
-
-    def naitre(self):
-        self.etat = True
-
-
-class Grille:
-    def __init__(self, taille, grille_initiale=None):
-        self.taille = taille
-        if grille_initiale is None:
-            self.grille = np.empty((self.taille, self.taille), dtype=object)
-            for i in range(self.taille):
-                for j in range(self.taille):
-                    self.grille[i][j] = Cellule()
-        else:
-            self.grille = grille_initiale
-
-    def compter_voisins_vivants(self, ligne, colonne):
-        voisins_vivants = 0
-        for i in range(-1, 2):
-            for j in range(-1, 2):
-                if (i != 0 or j != 0) and 0 <= ligne + i < self.taille and 0 <= colonne + j < self.taille:
-                    if self.grille[ligne + i][colonne + j].est_vivant():
-                        voisins_vivants += 1
-        return voisins_vivants
-
-    def mettre_a_jour(self):
-        nouvelle_grille = np.empty((self.taille, self.taille), dtype=object)
-
-        for i in range(self.taille):
-            for j in range(self.taille):
-                cellule_courante = self.grille[i][j]
-                nb_voisins = self.compter_voisins_vivants(i, j)
-
-                if cellule_courante.est_vivant():
-                    if nb_voisins < 2 or nb_voisins > 3:
-                        nouvelle_grille[i][j] = Cellule(False)
-                    else:
-                        nouvelle_grille[i][j] = Cellule(True)
-                else:
-                    if nb_voisins == 3:
-                        nouvelle_grille[i][j] = Cellule(True)
-                    else:
-                        nouvelle_grille[i][j] = Cellule(False)
-
-        self.grille = nouvelle_grille
-
 
 class JeuDeLaVieGUI:
     def __init__(self, root, taille):
         self.root = root
-        self.root.title("Jeu de la Vie de Conway")
+        self.root.title("Conway's Game of Life By Klaynight-dev")
+        self.root.configure(bg="#F5F5F5")  # Couleur de fond pour toute la fenêtre
 
         self.taille_grille = taille
+        self.jeu_en_cours = False
+
         self.jeu_de_la_vie = Grille(self.taille_grille, grille_initiale=generer_grille_initiale(self.taille_grille))
 
-        self.canvas = tk.Canvas(self.root, width=400, height=400, borderwidth=0, highlightthickness=0)
-        self.canvas.pack()
+        self.canvas = tk.Canvas(self.root, width=self.taille_grille * 20, height=self.taille_grille * 20,
+                                bg="white", bd=1, relief=tk.RAISED)  # Bordure pour le canevas
+        self.canvas.pack(pady=10)
 
-        self.cellules = [[self.canvas.create_rectangle(j * 20, i * 20, (j + 1) * 20, (i + 1) * 20, fill="white")
+        self.cellules = [[self.canvas.create_rectangle(j * 20, i * 20, (j + 1) * 20, (i + 1) * 20, fill="#E0E0E0", outline="#D3D3D3")
                           for j in range(self.taille_grille)]
                          for i in range(self.taille_grille)]
 
+        self.frame_largeur = tk.Frame(self.root, bg="#F5F5F5")  # Couleur de fond pour les cadres
+        self.frame_largeur.pack(pady=5)
+        self.label_largeur = tk.Label(self.frame_largeur, text="Largeur:", font=("Arial", 12), bg="#F5F5F5")
+        self.label_largeur.pack(side=tk.LEFT)
+        self.input_largeur = tk.Entry(self.frame_largeur, width=5, font=("Arial", 12))
+        self.input_largeur.pack(side=tk.LEFT)
+        self.input_largeur.insert(0, str(self.taille_grille))
+
+        self.frame_hauteur = tk.Frame(self.root, bg="#F5F5F5")
+        self.frame_hauteur.pack(pady=5)
+        self.label_hauteur = tk.Label(self.frame_hauteur, text="Hauteur:", font=("Arial", 12), bg="#F5F5F5")
+        self.label_hauteur.pack(side=tk.LEFT)
+        self.input_hauteur = tk.Entry(self.frame_hauteur, width=5, font=("Arial", 12))
+        self.input_hauteur.pack(side=tk.LEFT)
+        self.input_hauteur.insert(0, str(self.taille_grille))
+
+        self.btn_changer_taille = tk.Button(self.root, text="Changer Taille", command=self.changer_taille,
+                                            font=("Arial", 12), padx=10, pady=5, bg="#4CAF50", fg="white", bd=0)
+        self.btn_changer_taille.pack(pady=5)
+
+        self.btn_demarrer_arreter = tk.Button(self.root, text="Démarrer", command=self.demarrer_arreter_jeu,
+                                              font=("Arial", 12), padx=10, pady=5, bg="#2196F3", fg="white", bd=0)
+        self.btn_demarrer_arreter.pack()
+
+        self.canvas.bind("<Button-1>", self.changer_etat_cellule)
+
         self.root.after(1000, self.update_game)
 
+    def changer_etat_cellule(self, event):
+        cellule_x = event.x // 20
+        cellule_y = event.y // 20
+
+        cellule = self.jeu_de_la_vie.grille[cellule_y][cellule_x]
+        if cellule.est_vivant():
+            cellule.mourir()
+        else:
+            cellule.naitre()
+
+        color = "white" if not cellule.est_vivant() else "black"
+        self.canvas.itemconfig(self.cellules[cellule_y][cellule_x], fill=color)
+
+    def demarrer_arreter_jeu(self):
+        if self.jeu_en_cours:
+            self.jeu_en_cours = False
+            self.btn_demarrer_arreter.config(text="Démarrer")
+        else:
+            self.jeu_en_cours = True
+            self.btn_demarrer_arreter.config(text="Arrêter")
+            self.update_game()
+
     def update_game(self):
-        self.jeu_de_la_vie.mettre_a_jour()
+        if self.jeu_en_cours:
+            self.jeu_de_la_vie.mettre_a_jour()
 
-        for i in range(self.taille_grille):
-            for j in range(self.taille_grille):
-                color = "white" if not self.jeu_de_la_vie.grille[i][j].est_vivant() else "black"
-                self.canvas.itemconfig(self.cellules[i][j], fill=color)
+            # Utiliser la nouvelle taille de la grille
+            taille_actuelle = len(self.jeu_de_la_vie.grille)
 
-        self.root.after(500, self.update_game)
+            for i in range(taille_actuelle):
+                for j in range(taille_actuelle):
+                    if i < len(self.cellules) and j < len(self.cellules[i]):
+                        color = "white" if not self.jeu_de_la_vie.grille[i][j].est_vivant() else "black"
+                        self.canvas.itemconfig(self.cellules[i][j], fill=color)
+
+            self.root.after(500, self.update_game)
+
+    def changer_taille(self):
+        largeur = int(self.input_largeur.get())
+        hauteur = int(self.input_hauteur.get())
+
+        self.taille_grille = largeur if largeur > 0 else self.taille_grille
+        hauteur = hauteur if hauteur > 0 else self.taille_grille
+
+        self.jeu_de_la_vie = Grille(self.taille_grille, grille_initiale=generer_grille_initiale(self.taille_grille))
+
+        # Réinitialiser l'interface graphique avec la nouvelle taille
+        self.canvas.config(width=largeur * 20, height=hauteur * 20)
+
+        # Recréer la liste self.cellules avec les dimensions correctes
+        self.cellules = [[self.canvas.create_rectangle(j * 20, i * 20, (j + 1) * 20, (i + 1) * 20, fill="white")
+                          for j in range(largeur)]
+                         for i in range(hauteur)]
+
+        self.taille_grille = largeur  # Mise à jour de la taille actuelle de la grille
+
+
+
 
 
 if __name__ == "__main__":
     root = tk.Tk()
-    jeu = JeuDeLaVieGUI(root, 100)
+    jeu = JeuDeLaVieGUI(root, 20)
+    root.iconphoto(False, tk.PhotoImage(file="content/img/logo.ico"))
     root.mainloop()
